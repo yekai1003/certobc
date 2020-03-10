@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>区块链证书</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <div id="app">
+    <div class="wrap">
+      <el-tabs v-model="activeName">
+        <el-tab-pane label="证书查询" name="first">
+          <el-form ref="form" :model="query">
+            <el-form-item>
+              <el-input v-model="query.studentId" placeholder="请输入学号"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input v-model="query.studentName" placeholder="请输入姓名"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input v-model="query.courseName" placeholder="请输入课程名称"></el-input>
+            </el-form-item>
+            <el-form-item style="text-align: center;margin-top: 50px;">
+              <el-button type="primary" style="width: 100%;" @click="handleQuery(query)">查询</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="颁发" name="second">
+          <el-form ref="form" :model="award">
+            <el-form-item>
+              <el-input v-model="award.studentId" placeholder="请输入学号"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input v-model="award.studentName" placeholder="请输入姓名"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input v-model="award.courseName" placeholder="请输入课程名称"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-date-picker
+                v-model="award.startDate"
+                type="date"
+                placeholder="选择开始时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item>
+              <el-date-picker
+                v-model="award.endDate"
+                type="date"
+                placeholder="选择结束时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item style="text-align: center;margin-top: 50px;">
+              <el-button type="primary" style="width: 100%;" @click="handleAward(award)">颁发</el-button></el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
+      <el-dialog
+        :visible.sync="dialogVisible"
+        width="800px"
+      >
+        <div class="imgSite">
+          <div id="newImg">
+            <img src="http://localhost:8080/static/images/img.jpg" crossorigin="anonymous" alt="">
+            <div class="name">{{name}}</div>
+            <div class="date">{{date}}</div>
+            <div class="hash">{{hash}}</div>
+          </div>
+        </div>
+      </el-dialog>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="./html2canvas.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data(){
+        return {
+          activeName: 'first',  //tab标签
+          dialogVisible: false,   //弹出框
+          query: {   //查询表单数据
+            studentId: '',
+            studentName: '',
+            courseName: ''
+          },
+          award:{   //颁发表单数据
+            studentId: '',
+            studentName: '',
+            courseName: '',
+            startDate: '',
+            endDate: '',
+            password: ''
+          },
+          name: '',   //姓名
+          date: '',   //日期
+          hash: ''    //hash
+        }
+      },
+      methods:{
+        // 查询
+        handleQuery(res){
+          if(res.studentId == '' || res.studentId.trim().length === 0){
+            this.$message.error('学号不能为空！');
+            return;
+          }
+          if(res.studentName == '' || res.studentName.trim().length === 0){
+            this.$message.error('姓名不能为空！');
+            return;
+          }
+          if(res.courseName == '' || res.courseName.trim().length === 0){
+            this.$message.error('课程名称不能为空！');
+            return;
+          }
+          axios.post('http://localhost:8080/query',{
+            student_id: res.studentId,
+            student_name: res.studentName,
+            course_name: res.courseName
+          }).then(res=>{
+            console.log(res)
+            if(res.data.code == 0){
+              this.$message.success('查询成功！');
+              this.dialogVisible = true;
+              this.query.studentId = '';
+              this.query.studentName = '';
+              this.query.courseName = '';
+              this.name = res.data.data.student_name;
+              this.date = res.data.data.start_date + ' ~ ' + res.data.data.end_date;
+              this.hash = res.data.data.hash;
+              console.log(this)
+              this.setImage();
+            }
+          }).catch(err=>{
+            console.log(err);
+            this.$message.error('查询失败！');
+          })
+        },
+        // 颁发
+        handleAward(res){
+          if(res.studentId == '' || res.studentId.trim().length === 0){
+            this.$message.error('学号不能为空！');
+            return;
+          }
+          if(res.studentName == '' || res.studentName.trim().length === 0){
+            this.$message.error('姓名不能为空！');
+            return;
+          }
+          if(res.courseName == '' || res.courseName.trim().length === 0){
+            this.$message.error('课程名称不能为空！');
+            return;
+          }
+          if(!res.startDate){
+            this.$message.error('请选择开始时间！');
+            return;
+          }
+          if(!res.endDate){
+            this.$message.error('请选择结束时间！');
+            return;
+          }
+          this.$prompt('请输⼊密码','', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputType: 'password',
+          }).then(({ value }) => {
+            this.award.password = value;
+            console.log(this.award.password)
+            axios.post('http://localhost:8080/issue',{
+              student_id: res.studentId,
+              student_name: res.studentName,
+              course_name: res.courseName,
+              start_date: res.startDate,
+              end_date: res.endDate,
+              password: this.award.password
+            }).then(res=>{
+              console.log(res.data);
+              if(res.data.code == 0){
+                this.$message.success('颁发成功！');
+                this.activeName = 'first';
+                this.award.studentId = '';
+                this.award.studentName = '';
+                this.award.courseName = '';
+                this.award.startDate = '';
+                this.award.endDate = '';
+              }else{
+                this.$message.error('颁发失败！');
+              }
+            }).catch(err=>{
+              console.log(err);
+              this.$message.error('颁发失败！');
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });       
+          });
+        },
+        // 生成图片
+        setImage() {
+          this.$nextTick(()=>{
+            html2canvas(document.querySelector("#newImg"), {
+              useCORS: true
+            }).then(function(canvas) {
+              var image = new Image();
+              image.className = "img-responsive";
+              image.crossOrigin = "anonymous";
+              var imgURL = canvas.toDataURL("image/jpeg");
+              image.src = imgURL;
+              // console.log(image);
+              document.querySelector("#newImg").style.display = 'none';
+              document.querySelector(".imgSite").append(image);
+            });
+          })
+        },
+      }
+    })
+  </script>
+</body>
+</html>
