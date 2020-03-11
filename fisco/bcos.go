@@ -25,6 +25,12 @@ func init() {
 	if url != "" {
 		FISCO_NETWORK = url
 	}
+	crt := os.Getenv("CERT_CONTRACT_ADDR")
+	if crt != "" {
+		ContractAddr = crt
+	} else {
+		log.Panic("CERT_CONTRACT_ADDR must be set")
+	}
 }
 
 func DeployCert2Fisco(pass string) {
