@@ -3,12 +3,15 @@ package dbs
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pborman/uuid"
 	"github.com/yekai1003/gobcos/crypto"
 )
+
+var connstr = "admin:123456@tcp(10.211.55.3:3306)/cert?charset=utf8"
 
 type (
 	User struct {
@@ -50,7 +53,11 @@ var DBConn *sql.DB
 
 //init函数是本包被其他文件引用时自动执行，并且整个工程只会执行一次
 func init() {
-	db, err := sql.Open("mysql", "admin:123456@tcp(10.211.55.3:3306)/cert?charset=utf8")
+	mysqlconn := os.Getenv("MYSQL_ENV")
+	if mysqlconn != "" {
+		connstr = mysqlconn
+	}
+	db, err := sql.Open("mysql", connstr)
 	if err != nil {
 		panic(err.Error())
 	}

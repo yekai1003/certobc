@@ -53,3 +53,9 @@ Course struct {
 curl  -H "Content-type: application/json" -X POST -d '{"Course_name":"区块链应用工程师","remark":"oh my god，买它！"}' "http://localhost:8080/course"
 ```
 
+##  部署
+
+```sh
+export MYSQL_ENV="admin:123456@tcp(10.211.55.3:3306)/cert?charset=utf8"
+export FISCO_NETWORK="http://localhost:8545"
+```
