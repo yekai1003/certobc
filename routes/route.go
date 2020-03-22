@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"certobc/fisco"
+	"github.com/certobc/eths"
 
 	"github.com/labstack/echo"
 )
@@ -118,7 +118,7 @@ func Issue(c echo.Context) error {
 	}
 	//4. 调用区块链证书
 
-	err = bcos.CertIssue(student.Password, fmt.Sprintf("%s", user.UUID), bcos.GetHash(course.CourseName))
+	err = eths.CertIssue(student.Password, fmt.Sprintf("%s", user.UUID), eths.GetHash(course.CourseName))
 	if err != nil {
 		fmt.Println("Failed to CertIssue", err)
 		resp.Errno = utils.RECODE_HASHERR
@@ -185,9 +185,9 @@ func Query(c echo.Context) error {
 	}
 	fmt.Println(cert)
 	//4. fisco验证
-	hash, err := bcos.Verify(fmt.Sprintf("%s", cert.UUID), bcos.GetHash(student.Course_name))
+	hash, err := eths.Verify(fmt.Sprintf("%s", cert.UUID), eths.GetHash(student.Course_name))
 	if err != nil {
-		fmt.Println(cert.UUID, bcos.GetHash(student.Course_name))
+		fmt.Println(cert.UUID, eths.GetHash(student.Course_name))
 		resp.Errno = utils.RECODE_BCOSERR
 		return err
 	}

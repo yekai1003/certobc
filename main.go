@@ -1,11 +1,10 @@
 package main
 
 import (
-	"certobc/routes"
+	"github.com/yekai1003/certobc/routes"
 
 	_ "github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	_ "github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/middleware"
 )
 
@@ -22,7 +21,6 @@ func main() {
 	EchoObj = echo.New()
 	EchoObj.Use(middleware.Logger()) //安装日志中间件
 	EchoObj.Use(middleware.Recover())
-	//EchoObj.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	EchoObj.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,

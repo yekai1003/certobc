@@ -1,4 +1,4 @@
-package bcos
+package eths
 
 import (
 	"fmt"
@@ -6,24 +6,24 @@ import (
 	"os"
 	"strings"
 
-	"github.com/satori/go.uuid"
-	"github.com/yekai1003/gobcos/accounts/abi/bind"
-	"github.com/yekai1003/gobcos/client"
-	"github.com/yekai1003/gobcos/common"
-	"github.com/yekai1003/gobcos/crypto"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
+	_ "github.com/satori/go.uuid"
 )
 
 const FISCO_GROUP = 1
 
-var FISCO_NETWORK = "http://localhost:8545"
+var ETH_NETWORK = "http://localhost:8545"
 var ContractAddr = "0x016431d5333CFcad5A2acc2274EE53F3B5343334"
 
 const adminkey = `{"address":"3f8712acd6ed891ec329fd5ae0a93dd713237e5d","crypto":{"cipher":"aes-128-ctr","ciphertext":"623b85925792e49ac809f474c96a6dc46080d865e5fe1fa89df6c3410fbbfda1","cipherparams":{"iv":"4f0521483a5577b1573f0f63d88b0ede"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":4096,"p":6,"r":8,"salt":"c8ac5e6ee11526b43c2b66a44d0c0bd006fdaff23d22bd64e968406f61e38244"},"mac":"5fd86fc981d37bda5fdab0374db7916244b3dbb3eb71e92b9b6e509e21f9f009"},"id":"2785cb09-649d-4deb-88d2-de152eb78bd5","version":3}`
 
 func init() {
-	url := os.Getenv("FISCO_NETWORK")
+	url := os.Getenv("ETH_NETWORK")
 	if url != "" {
-		FISCO_NETWORK = url
+		ETH_NETWORK = url
 	}
 	crt := os.Getenv("CERT_CONTRACT_ADDR")
 	if crt != "" {
@@ -33,30 +33,9 @@ func init() {
 	}
 }
 
-func DeployCert2Fisco(pass string) {
-	//1. 连接到fisco节点
-	cli, err := client.Dial(FISCO_NETWORK, FISCO_GROUP)
-	if err != nil {
-		log.Panic("Failed to Dial", err)
-	}
-	//延迟关闭连接
-	defer cli.Close()
-
-	//2.签名
-	keyin := strings.NewReader(adminkey)
-	auth, err := bind.NewTransactor(keyin, pass)
-	//3. 合约部署
-	//common.Address, *types.RawTransaction, *Cert, error
-	address, tx, _, err := DeployCert(auth, cli)
-	if err != nil {
-		log.Panic("Failed to DeployCert", err)
-	}
-	fmt.Println(tx.Hash().Hex(), address.Hex())
-}
-
 func CertIssue(pass, uuid string, olHash [32]byte) error {
-	//1. 连接到fisco节点
-	cli, err := client.Dial(FISCO_NETWORK, FISCO_GROUP)
+	//1. 连接到eth节点
+	cli, err := ethclient.Dial(ETH_NETWORK)
 	if err != nil {
 		fmt.Println("Failed to Dial", err)
 		return err
@@ -84,8 +63,8 @@ func CertIssue(pass, uuid string, olHash [32]byte) error {
 }
 
 func Verify(uuid string, olHash [32]byte) ([32]byte, error) {
-	//1. 连接到fisco节点
-	cli, err := client.Dial(FISCO_NETWORK, FISCO_GROUP)
+	//1. 连接到eth节点
+	cli, err := ethclient.Dial(ETH_NETWORK)
 	if err != nil {
 		fmt.Println("Failed to Dial fisco ", err)
 		return [32]byte{}, err
@@ -113,9 +92,9 @@ func Verify(uuid string, olHash [32]byte) ([32]byte, error) {
 	return hash, nil
 }
 
-func GetUUID() string {
-	return fmt.Sprint("%s", uuid.NewV4())
-}
+// func GetUUID() string {
+// 	return fmt.Sprint("%s", uuid.NewV4())
+// }
 
 func GetHash(name string) [32]byte {
 	return crypto.Keccak256Hash([]byte(name))

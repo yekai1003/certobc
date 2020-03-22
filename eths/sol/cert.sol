@@ -1,7 +1,7 @@
-pragma solidity^0.4.25;
-pragma experimental ABIEncoderV2;
+pragma solidity^0.6.1;
+//pragma experimental ABIEncoderV2;
 
-contract olcert {
+contract cert {
     address public admin;
     struct Cert {
         string uuid;
@@ -24,6 +24,10 @@ contract olcert {
         require(address(0) != user, "user must exists");
         admin = user;
     }
+    function getHash() public view returns (bytes32) {
+        return keccak256(abi.encode(msg.sender));
+    }
+     // 证书发行:输入用户uuid和课程名称hash值
     function issue(string memory uuid, bytes32 olHash) public onlyadmin {
         bytes32 hash = keccak256(abi.encode(uuid, olHash));
         require(!certMap[hash].ok, "must not exists");
@@ -32,18 +36,17 @@ contract olcert {
         userCerts[uuid].push(hash);
         emit certIssue(uuid, olHash, hash);
     }
-    function getCourseByHash(bytes32 certHash) public view returns (Cert memory) {
-        return certMap[certHash];
-    }
-    function getUserCerts(string memory uuid) public view returns (bytes32[] memory) {
-        return userCerts[uuid];
-    }
+    // 证书验证:输入用户uuid和课程名称hash值
     function verifyCourseHash(string memory uuid, bytes32 olHash) public view returns (bytes32) {
         bytes32 hash = keccak256(abi.encode(uuid, olHash));
         require(certMap[hash].ok, "must be exists");
         require(certMap[hash].olHash ==olHash, "hash must right!");
         return hash;
     }
+    function getUserCerts(string memory uuid) public view returns (bytes32[] memory) {
+        return userCerts[uuid];
+    }
+    
     
     
 }
