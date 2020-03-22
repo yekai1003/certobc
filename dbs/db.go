@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pborman/uuid"
-	"github.com/yekai1003/gobcos/crypto"
 )
 
 var connstr = "admin:123456@tcp(10.211.55.3:3306)/cert?charset=utf8"
