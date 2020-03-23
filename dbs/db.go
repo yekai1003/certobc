@@ -11,7 +11,7 @@ import (
 	"github.com/pborman/uuid"
 )
 
-var connstr = "admin:123456@tcp(10.211.55.3:3306)/cert?charset=utf8"
+var connstr = "admin:123456@tcp(118.89.103.58:3306)/cert?charset=utf8"
 
 type (
 	User struct {
