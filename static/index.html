@@ -118,7 +118,7 @@
             this.$message.error('课程名称不能为空！');
             return;
           }
-          axios.post('http://localhost:8080/query',{
+          axios.post(self.location.origin + '/query',{
             student_id: res.studentId,
             student_name: res.studentName,
             course_name: res.courseName
@@ -169,8 +169,9 @@
             inputType: 'password',
           }).then(({ value }) => {
             this.award.password = value;
-            console.log(this.award.password)
-            axios.post('http://localhost:8080/issue',{
+            console.log(self.location.origin)
+            
+            axios.post(self.location.origin + '/issue',{
               student_id: res.studentId,
               student_name: res.studentName,
               course_name: res.courseName,
